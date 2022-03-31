@@ -59,7 +59,7 @@ def get_parsers():
     parser.add_argument('--print_log', default=5, type=int)
     parser.add_argument('--update_iteration', default=100, type=int)
     parser.add_argument('--pre_training', action="store_true", default=False, help="pre training")
-    parser.add_argument('--exp_name', type=str, default="0323_CR_R9_L9_N40")
+    parser.add_argument('--exp_name', type=str, default="0323_CR_R8_L8_N40")
     parser.add_argument('--format', type=int, default=0, help='the format of datas')
     return parser.parse_args()
 
@@ -193,8 +193,8 @@ class Agent():
         else:
             self.is_pre = False
      
-    def initial_repm(self, start_index):
-        self.repm=REPM(start_index=start_index)
+    def initial_Conformer(self, start_index):
+        self.conformer=Conformer(start_index=start_index)
 
     def pre_training(self):
         print("Pre training...")
@@ -380,9 +380,9 @@ class Agent():
         step = 0
         env = Environment(settings, "EPRIReward")
         obs, start_idx = env.reset(start_sample_idx=42312)
-        self.initial_repm(start_index=42312)
+        self.initial_Conformer(start_index=42312)
         
-        state_p = torch.Tensor([sep_all(obs, agent.repm, args.format)])
+        state_p = torch.Tensor([sep_all(obs, agent.conformer, args.format)])
         test_total_reward_t_lists = {"EPRIReward":[], "line_over_flow_reward":[], "renewable_consumption_reward":[] ,
                             "running_cost_reward":[] ,"balanced_gen_reward":[] ,"gen_reactive_power_reward":[] ,"sub_voltage_reward":[],"running_cost":[]}
         while True:
@@ -415,7 +415,7 @@ class Agent():
             if abs(reward-0)<0.00001:
                 reward=-2
         
-            state_p_next = torch.Tensor([sep_all(next_obs, agent.repm, args.format)])
+            state_p_next = torch.Tensor([sep_all(next_obs, agent.conformer, args.format)])
             #if args.render and i >= args.render_interval: env.render()
             if reward>0.5 or len(self.replay_buffer.storage) < 500:
                 self.replay_buffer.push((state_p, state_p_next, action_p, reward, np.float(done)))
@@ -469,9 +469,9 @@ if __name__ == '__main__':
         step = 0
         env = Environment(settings, "EPRIReward")
         obs, start_idx = env.reset(start_sample_idx=42312)
-        agent.initial_repm(start_index=42312)
+        agent.initial_Conformer(start_index=42312)
         agent.load()
-        state_p = torch.Tensor([sep_all(obs, agent.repm, args.format)])
+        state_p = torch.Tensor([sep_all(obs, agent.conformer, args.format)])
         test_total_reward_t_lists = {"EPRIReward":[], "line_over_flow_reward":[], "renewable_consumption_reward":[] ,
                             "running_cost_reward":[] ,"balanced_gen_reward":[] ,"gen_reactive_power_reward":[] ,"sub_voltage_reward":[],"running_cost":[]}
         while True:
@@ -502,7 +502,7 @@ if __name__ == '__main__':
             if abs(reward-0)<0.00001:
                reward=-2
         
-            state_p_next = torch.Tensor([sep_all(next_obs, agent.repm, args.format)])
+            state_p_next = torch.Tensor([sep_all(next_obs, agent.conformer, args.format)])
 
             if reward>-5 or len(agent.replay_buffer.storage) < 1000:
                 agent.replay_buffer.push((state_p, state_p_next, action_p, reward, np.float(done)))
